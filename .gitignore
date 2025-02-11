@@ -1,0 +1,8 @@
+data/*
+weights/*
+utils/*
+results/*
+OC_SORT
+
+not_use
+.DS_Store
