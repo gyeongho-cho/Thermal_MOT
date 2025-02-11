@@ -1,0 +1,6 @@
+[submodule "ocsort"]
+	path = ocsort
+	url = https://github.com/noahcao/OC_SORT
+[submodule "OC_SORT"]
+	path = OC_SORT
+	url = https://github.com/noahcao/OC_SORT
