@@ -1,0 +1,35 @@
+_BASE_: ../Base-SBS.yml
+
+MODEL:
+  BACKBONE:
+    NAME: build_resnest_backbone
+  # WEIGHTS: "output/thermal_mot/sbs_s50/model_final.pth"
+
+  LOSSES:
+    NAME: ("CrossEntropyLoss", "TripletLoss",)
+    CE:
+      EPSILON: 0.1
+      SCALE: 1.0
+
+    TRI:
+      MARGIN: 0.0
+      HARD_MINING: True
+      NORM_FEAT: False
+      SCALE: 1.0
+
+DATASETS:
+  NAMES: ("ThermalMOT",)
+  TESTS: ("ThermalMOT",)
+
+# OUTPUT_DIR: output/thremal_mot/sbs_S50
+
+
+SOLVER:
+  MAX_EPOCH: 200
+  IMS_PER_BATCH: 128
+  BASE_LR: 0.00035
+  ETA_MIN_LR: 0.00007
+
+
+TEST:
+  EVAL_PERIOD: 5

@@ -163,6 +163,18 @@ def process(tracker_info, folder, annotation_folder, outfile, mode="test"):
                 tracked_objects = tracker.update(None, img_info=(512,640),img_size=(512,640) )                
             else:
                 tracked_objects = tracker.update(detected_objects, img_info=(512,640),img_size=(512,640) )
+
+            # # 이미지 정보 설정 (img_tensor, img_numpy 생성)
+            # img_info = (frame.shape[0], frame.shape[1])  # (height, width)
+            # img_tensor = torch.tensor(frame).permute(2, 0, 1).float().unsqueeze(0)  # PyTorch Tensor 변환
+            # img_numpy = frame.copy()  # OpenCV (numpy) 포맷 유지
+
+            # # Deep OC-SORT 추적기 업데이트
+            # if len(detected_objects)==0:
+            #     tracked_objects = tracker.update(None, img_tensor, img_numpy, f'{seq}:{frame_id}')
+            # else:
+            #     tracked_objects = tracker.update(detected_objects, img_tensor, img_numpy, f'{seq}:{frame_id}')
+                
         elif tracker_type == "deepocsort":
             detected_objects = torch.tensor([(x1, y1, x2, y2, conf) for x1, y1, x2, y2, conf in detections])
 
@@ -258,7 +270,7 @@ if __name__ == "__main__":
     out_folder = "/Users/horang/Documents/ai/MOT/results/"
 
     # 사용할 모드 선택 ('train', 'val', 'test')
-    mode = "test"
+    mode = "val"
     tracker_type = "ocsort"
 
     if mode == "train":
@@ -278,7 +290,7 @@ if __name__ == "__main__":
         if tracker_type == "sort":
             tracker = Sort(max_age=50, min_hits=3, iou_threshold=0.3)
         elif tracker_type == "deepsort":
-            tracker = DeepSort(max_age=50)
+            tracker = DeepSort(max_age=30)
         elif tracker_type == "ocsort":
             from OC_SORT.trackers.ocsort_tracker.ocsort import OCSort # OCSORT
             tracker = OCSort(det_thresh=0.3)
@@ -331,7 +343,6 @@ if __name__ == "__main__":
             args = get_main_args()
             tracker = BYTETracker(args)
         elif tracker_type == "deepocsort":
-
             from Deep_OC_SORT.trackers import integrated_ocsort_embedding as tracker_module
             def get_main_args():
                 parser = tracker_module.args.make_parser()
@@ -339,7 +350,7 @@ if __name__ == "__main__":
                 parser.add_argument("--result_folder", type=str, default="results/trackers/")
                 parser.add_argument("--test_dataset", action="store_true")
                 parser.add_argument("--exp_name", type=str, default="exp1")
-                parser.add_argument("--min_box_area", type=float, default=10, help="filter out tiny boxes")
+                parser.add_argument("--min_box_area", type=float, default=20, help="filter out tiny boxes")
                 parser.add_argument(
                     "--aspect_ratio_thresh",
                     type=float,
@@ -364,8 +375,8 @@ if __name__ == "__main__":
                 parser.add_argument("--aw_param", type=float, default=0.5)
                 parser.add_argument("--new_kf_off", action="store_true")
                 parser.add_argument("--grid_off", action="store_true")
-                args = parser.parse_args()
-                # args = parser.parse_args(["--cmc_off"])
+                # args = parser.parse_args()
+                args = parser.parse_args(["--cmc_off","--grid_off"])
 
                 if args.dataset == "mot17":
                     args.result_folder = os.path.join(args.result_folder, "MOT17-val")

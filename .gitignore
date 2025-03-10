@@ -3,7 +3,7 @@ weights/*
 utils/*
 results/*
 cache
-# OC_SORT
-Deep_OC_SORT
+Deep_OC_SORT/external/weights/*
+
 not_use
 .DS_Store
