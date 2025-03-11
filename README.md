@@ -13,24 +13,10 @@
 <div align="center">
   <img src="figs/test_bytetrack_output.gif" alt="Demo" width="50%">
 </div>
----
 
-## 📁 Project Structure
-```
-.
-├── test.py                 # Main tracking + evaluation script
-├── run_test.sh            # Shell script for batch testing with various thresholds
-├── weights/               # Trained YOLO model weights
-├── tracker/               # SORT / ByteTrack implementations
-├── Deep_OC_SORT/          # Deep OC-SORT tracker
-├── OC_SORT/               # OC-SORT tracker
-├── datasets/              # Dataset directory (e.g., TMOT)
-└── results/               # Output tracking results
-```
 
----
 
-## Getting Start
+## ⚙️ Getting Start
 
 ### 1. Install dependencies
 ```bash
