@@ -1,3 +1,4 @@
+
 # 🔥 Thermal MOT: Multi-Object Tracking on Thermal Images
 
 <div align="center">
@@ -9,9 +10,7 @@
 
 This project performs multi-object tracking (MOT) on thermal image sequences using YOLO-based detection and several state-of-the-art tracking algorithms such as SORT, Deep SORT, ByteTrack, OC-SORT, and Deep OC-SORT.
 
-
-https://github.com/user-attachments/assets/45e4c54e-85a4-489b-b1ae-96173ad15cf1
-
+![Demo](figs/test_bytetrack_output.gif)
 
 ---
 
