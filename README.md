@@ -5,13 +5,22 @@
 <a href="https://eval.ai/web/challenges/challenge-page/2439/overview"><img src="https://img.shields.io/badge/EvalAI-TMOT%20Challenge-blueviolet" alt="EvalAI"/></a>
 <a href="https://pseudo-lab.github.io/3D-Perception/"><img src="https://img.shields.io/badge/2025CVPRW-PBVS-navy" alt="Workshop"/></a>
 <a href="https://github.com/wassimea/thermalMOT/"><img src="https://img.shields.io/badge/Github-181717?logo=github" alt="Git"/></a>
+
+
   
 </div>
 
->This project performs multi-object tracking (MOT) on thermal image sequences using YOLO-based detection and several state-of-the-art tracking algorithms such as SORT, Deep SORT, ByteTrack, OC-SORT, and Deep OC-SORT.
+>This repository contains my approach to the Thermal MOT Challenge 2025, organized under the 21st IEEE Workshop on Perception Beyond the Visible Spectrum (PBVS). It involves training a thermal image object detector and evaluating multiple MOT frameworks. The excellent submissions will be announced at CVPR 2025.
+
+<br><br>
 
 <div align="center">
+  <img src="https://pbvs-workshop.github.io/images/logo_25.jpg" alt="Demo" width="70%">
+  
+  <br><br>
+  
   <img src="figs/test_bytetrack_output.gif" alt="Demo" width="50%">
+  
 </div>
 
 
