@@ -1,6 +1,17 @@
 # 🔥 Thermal MOT: Multi-Object Tracking on Thermal Images
 
+<div align="center">
+<a href="https://eval.ai/web/challenges/challenge-page/2439/overview"><img src="https://img.shields.io/badge/EvalAI-TMOT%20Challenge-blueviolet" alt="EvalAI"/></a>
+<a href="https://pseudo-lab.github.io/3D-Perception/"><img src="https://img.shields.io/badge/2025CVPRW-PBVS-navy" alt="Workshop"/></a>
+<a href="https://github.com/wassimea/thermalMOT/"><img src="https://img.shields.io/badge/Github-181717?logo=github" alt="Git"/></a>
+  
+</div>
+
 This project performs multi-object tracking (MOT) on thermal image sequences using YOLO-based detection and several state-of-the-art tracking algorithms such as SORT, Deep SORT, ByteTrack, OC-SORT, and Deep OC-SORT.
+
+
+https://github.com/user-attachments/assets/45e4c54e-85a4-489b-b1ae-96173ad15cf1
+
 
 ---
 
@@ -23,7 +34,7 @@ This project performs multi-object tracking (MOT) on thermal image sequences usi
 
 ### 1. Install dependencies
 ```bash
-pip install -r requirements.txt
+$ pip install -r requirements.txt
 ```
 
 ---
@@ -86,10 +97,14 @@ Tracking performance is evaluated using [MOTMetrics](https://github.com/cheind/p
 - ID Switches
 - IDP / IDR
 
+<div align="center">
+  
 | | MOTA | MOTP | IDF1 | IDP | IDR | RCLL | PRCN
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | 
 | Bytetrack | **65.90** | **0.2113** | **65.31** | 73.74 | **58.61** | **73.24** | 92.14 |
 | OCSORT | 62.94 | 0.1747 | 61.40 | **75.16** | 51.90 | 66.52 | **96.34** |
+
+</div>
 
 ---
 ## 📚 References
