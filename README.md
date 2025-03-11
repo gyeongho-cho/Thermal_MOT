@@ -3,7 +3,7 @@
 
 <div align="center">
 <a href="https://eval.ai/web/challenges/challenge-page/2439/overview"><img src="https://img.shields.io/badge/EvalAI-TMOT%20Challenge-blueviolet" alt="EvalAI"/></a>
-<a href="https://pseudo-lab.github.io/3D-Perception/"><img src="https://img.shields.io/badge/2025CVPRW-PBVS-navy" alt="Workshop"/></a>
+<a href="https://pbvs-workshop.github.io/"><img src="https://img.shields.io/badge/2025CVPRW-PBVS-navy" alt="Workshop"/></a>
 <a href="https://github.com/wassimea/thermalMOT/"><img src="https://img.shields.io/badge/Github-181717?logo=github" alt="Git"/></a>
 
 
