@@ -41,7 +41,7 @@ def compute_iou(box1, box2):
 
     return inter_area / float(box_area + boxg_area - inter_area)
 
-def evaluate_tracking(predictions, gt_bboxes):
+def evaluate_tracking(predictions, gt_bboxes, save_csv_path=None, track_thresh=None, seq=None, match_thresh=None):
     """
     predictions: List of (frame_id, track_id, x1, y1, x2, y2)
     gt_bboxes: List of (frame_id, gt_id, x1, y1, x2, y2)
@@ -80,6 +80,16 @@ def evaluate_tracking(predictions, gt_bboxes):
     print(summary)
     print(f"Runtime Performance: {total_time:.2f} seconds")
     print('=' * 50)
+
+
+    # ⬇ CSV 저장 추가
+    if save_csv_path:
+        # track_thresh와 seq도 컬럼으로 추가
+        summary["track_thresh"] = track_thresh
+        summary["match_thresh"] = match_thresh
+        summary["seq"] = seq
+        
+        summary.to_csv(save_csv_path, mode='a', header=not os.path.exists(save_csv_path))
 
 # GT 데이터 불러오기
 def load_coco_annotations(annotation_path):
@@ -122,6 +132,15 @@ def process(tracker_info, folder, annotation_folder, outfile, mode="test"):
     tracker_type, tracker = tracker_info
     results = []
     imgs = sorted(filter(lambda x: x.endswith(('.jpg', '.png', '.jpeg')), os.listdir(folder)), key=lambda x: int(x.split('.')[0]))
+
+
+    # # 👉 VideoWriter 설정 (첫 프레임에서 정보 얻어서 초기화)
+    # first_frame = cv2.imread(os.path.join(folder, imgs[0]))
+    # height, width = first_frame.shape[:2]
+    # save_video_path = os.path.join("results", f"{mode}_{tracker_type}_output.mp4")  # 원하는 경로로 바꾸세요
+    # fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # 또는 'XVID'
+    # video_writer = cv2.VideoWriter(save_video_path, fourcc, 15.0, (width, height))  # 15 FPS 설정
+
 
     # GT 데이터 로드 (train, val 모드에서만 적용)
     if mode in ["train", "val"]:
@@ -194,10 +213,12 @@ def process(tracker_info, folder, annotation_folder, outfile, mode="test"):
             # 이미지 정보 설정 (img_tensor, img_numpy 생성)
             img_info = (frame.shape[0], frame.shape[1])  # (height, width)
             img_tensor = torch.tensor(frame).permute(2, 0, 1).float().unsqueeze(0)  # PyTorch Tensor 변환
-            img_numpy = frame.copy()  # OpenCV (numpy) 포맷 유지
+            img_numpy = np.expand_dims(frame.copy(),0)  # OpenCV (numpy) 포맷 유지
 
-            # Deep OC-SORT 추적기 업데이트
-            tracked_objects = tracker.update(detected_objects, img_tensor, img_numpy, f'{seq}:{frame_id}')
+            if len(detected_objects)==0:
+                tracked_objects = tracker.update(np.empty((0,5)), img_tensor, img_numpy, f'{seq}:{frame_id}')
+            else:
+                tracked_objects = tracker.update(detected_objects, img_tensor, img_numpy, f'{seq}:{frame_id}')
 
 
         online_x1y1x2y2 = []
@@ -229,7 +250,7 @@ def process(tracker_info, folder, annotation_folder, outfile, mode="test"):
             # 트랙 ID 색상 지정
             color = get_color(track_id)
             cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
-            cv2.putText(frame, f"P: {track_id}", (x1, y1 - 10),
+            cv2.putText(frame, f"ID: {track_id}", (x1, y1 - 10),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
 
         # GT 표시 (train, val 모드에서만 활성화)
@@ -248,6 +269,8 @@ def process(tracker_info, folder, annotation_folder, outfile, mode="test"):
         cv2.imshow(f"YOLO + SORT Tracking ({mode.upper()})", frame)
         cv2.waitKey(1)
 
+        # video_writer.write(frame)  # 💾 프레임 저장
+
         prog_bar.update()
         # if frame_id >10:break
     # 평가 수행
@@ -255,8 +278,11 @@ def process(tracker_info, folder, annotation_folder, outfile, mode="test"):
         annot = []
         for _, gt in gt_data.items():
             annot+=gt
-        evaluate_tracking(results, annot)
+        metric_csv_path = os.path.join("metric.csv")  # 하나의 파일에 계속 append
+        evaluate_tracking(results, annot, save_csv_path=metric_csv_path, track_thresh=args.track_thresh, seq=args.seq, match_thresh=args.match_thresh)
+        # evaluate_tracking(results, annot)
 
+    # video_writer.release()  # 💥 반드시 마지막에 저장 완료
     cv2.destroyAllWindows()
 
     if mode == 'test':
@@ -264,14 +290,14 @@ def process(tracker_info, folder, annotation_folder, outfile, mode="test"):
 
 if __name__ == "__main__":
     # 데이터 경로 설정
-    base_path = "/Users/horang/Downloads/tmot_dataset_challenge/"
+    base_path = "./tmot_dataset_challenge/"
     data_folder = os.path.join(base_path, "images")
     annotation_folder = os.path.join(base_path, "annotations")
-    out_folder = "/Users/horang/Documents/ai/MOT/results/"
+    out_folder = "./results/"
 
     # 사용할 모드 선택 ('train', 'val', 'test')
-    mode = "val"
-    tracker_type = "ocsort"
+    mode = "test"
+    tracker_type = "bytetrack"
 
     if mode == "train":
         sequences = [seq for seq in sorted(os.listdir(os.path.join(data_folder, "train"))) if seq[:3]=='seq']
@@ -286,131 +312,95 @@ if __name__ == "__main__":
     model_weights = "./weights/train5/best.pt"
     model = YOLO(model_weights)
 
-    for sequence in sequences:
-        if tracker_type == "sort":
-            tracker = Sort(max_age=50, min_hits=3, iou_threshold=0.3)
-        elif tracker_type == "deepsort":
-            tracker = DeepSort(max_age=30)
-        elif tracker_type == "ocsort":
-            from OC_SORT.trackers.ocsort_tracker.ocsort import OCSort # OCSORT
-            tracker = OCSort(det_thresh=0.3)
-        elif tracker_type == "bytetrack":
-            from Deep_OC_SORT.trackers.byte_tracker.byte_tracker import BYTETracker 
-            from Deep_OC_SORT.trackers.byte_tracker.args import make_parser 
-            def get_main_args():
-                parser = make_parser()
-                parser.add_argument("--dataset", type=str, default="thermal_mot")
-                parser.add_argument("--result_folder", type=str, default="results/trackers/")
-                parser.add_argument("--test_dataset", action="store_true")
-                parser.add_argument("--exp_name", type=str, default="exp1")
-                parser.add_argument("--min_box_area", type=float, default=10, help="filter out tiny boxes")
-                parser.add_argument(
-                    "--aspect_ratio_thresh",
-                    type=float,
-                    default=1.6,
-                    help="threshold for filtering out boxes of which aspect ratio are above the given value.",
-                )
-                parser.add_argument(
-                    "--post",
-                    action="store_true",
-                    help="run post-processing linear interpolation.",
-                )
-                parser.add_argument("--w_assoc_emb", type=float, default=0.75, help="Combine weight for emb cost")
-                parser.add_argument(
-                    "--alpha_fixed_emb",
-                    type=float,
-                    default=0.95,
-                    help="Alpha fixed for EMA embedding",
-                )
-                parser.add_argument("--emb_off", action="store_true")
-                parser.add_argument("--cmc_off", action="store_true")
-                parser.add_argument("--aw_off", action="store_true")
-                parser.add_argument("--aw_param", type=float, default=0.5)
-                parser.add_argument("--new_kf_off", action="store_true")
-                parser.add_argument("--grid_off", action="store_true")
-                args = parser.parse_args()
-                # args = parser.parse_args(["--cmc_off"])
+    # for sequence in sequences:
+    if tracker_type == "sort":
+        tracker = Sort(max_age=50, min_hits=3, iou_threshold=0.3)
+    elif tracker_type == "deepsort":
+        tracker = DeepSort(max_age=30)
+    elif tracker_type == "ocsort":
+        from OC_SORT.trackers.ocsort_tracker.ocsort import OCSort # OCSORT
+        tracker = OCSort(det_thresh=0.3)
+    elif tracker_type == "bytetrack":
+        from Deep_OC_SORT.trackers.byte_tracker.byte_tracker import BYTETracker 
+        from Deep_OC_SORT.trackers.byte_tracker.args import make_parser 
+        def get_main_args():
+            parser = make_parser()
+            parser.add_argument("--seq", default=0, type=int, help="local rank for dist training")
+            args = parser.parse_args()
 
-                if args.dataset == "mot17":
-                    args.result_folder = os.path.join(args.result_folder, "MOT17-val")
-                elif args.dataset == "mot20":
-                    args.result_folder = os.path.join(args.result_folder, "MOT20-val")
-                elif args.dataset == "dance":
-                    args.result_folder = os.path.join(args.result_folder, "DANCE-val")
-                if args.test_dataset:
-                    args.result_folder.replace("-val", "-test")
-                return args
-            args = get_main_args()
-            tracker = BYTETracker(args)
-        elif tracker_type == "deepocsort":
-            from Deep_OC_SORT.trackers import integrated_ocsort_embedding as tracker_module
-            def get_main_args():
-                parser = tracker_module.args.make_parser()
-                parser.add_argument("--dataset", type=str, default="thermal_mot")
-                parser.add_argument("--result_folder", type=str, default="results/trackers/")
-                parser.add_argument("--test_dataset", action="store_true")
-                parser.add_argument("--exp_name", type=str, default="exp1")
-                parser.add_argument("--min_box_area", type=float, default=20, help="filter out tiny boxes")
-                parser.add_argument(
-                    "--aspect_ratio_thresh",
-                    type=float,
-                    default=1.6,
-                    help="threshold for filtering out boxes of which aspect ratio are above the given value.",
-                )
-                parser.add_argument(
-                    "--post",
-                    action="store_true",
-                    help="run post-processing linear interpolation.",
-                )
-                parser.add_argument("--w_assoc_emb", type=float, default=0.75, help="Combine weight for emb cost")
-                parser.add_argument(
-                    "--alpha_fixed_emb",
-                    type=float,
-                    default=0.95,
-                    help="Alpha fixed for EMA embedding",
-                )
-                parser.add_argument("--emb_off", action="store_true")
-                parser.add_argument("--cmc_off", action="store_true")
-                parser.add_argument("--aw_off", action="store_true")
-                parser.add_argument("--aw_param", type=float, default=0.5)
-                parser.add_argument("--new_kf_off", action="store_true")
-                parser.add_argument("--grid_off", action="store_true")
-                # args = parser.parse_args()
-                args = parser.parse_args(["--cmc_off","--grid_off"])
-
-                if args.dataset == "mot17":
-                    args.result_folder = os.path.join(args.result_folder, "MOT17-val")
-                elif args.dataset == "mot20":
-                    args.result_folder = os.path.join(args.result_folder, "MOT20-val")
-                elif args.dataset == "dance":
-                    args.result_folder = os.path.join(args.result_folder, "DANCE-val")
-                if args.test_dataset:
-                    args.result_folder.replace("-val", "-test")
-                return args
-            args = get_main_args()
-
-            oc_sort_args = dict(
-                args=args,
-                det_thresh=args.track_thresh,
-                iou_threshold=args.iou_thresh,
-                asso_func=args.asso,
-                delta_t=args.deltat,
-                inertia=args.inertia,
-                w_association_emb=args.w_assoc_emb,
-                alpha_fixed_emb=args.alpha_fixed_emb,
-                embedding_off=args.emb_off,
-                cmc_off=args.cmc_off,
-                aw_off=args.aw_off,
-                aw_param=args.aw_param,
-                new_kf_off=args.new_kf_off,
-                grid_off=args.grid_off,
+            return args
+        args = get_main_args()
+        tracker = BYTETracker(args)
+    elif tracker_type == "deepocsort":
+        from Deep_OC_SORT.trackers import integrated_ocsort_embedding as tracker_module
+        def get_main_args():
+            parser = tracker_module.args.make_parser()
+            parser.add_argument("--dataset", type=str, default="thermal_mot")
+            parser.add_argument("--result_folder", type=str, default="results/trackers/")
+            parser.add_argument("--test_dataset", action="store_true")
+            parser.add_argument("--exp_name", type=str, default="exp1")
+            parser.add_argument("--min_box_area", type=float, default=20, help="filter out tiny boxes")
+            parser.add_argument(
+                "--aspect_ratio_thresh",
+                type=float,
+                default=1.6,
+                help="threshold for filtering out boxes of which aspect ratio are above the given value.",
             )
-            tracker = tracker_module.ocsort.OCSort(**oc_sort_args)
+            parser.add_argument(
+                "--post",
+                action="store_true",
+                help="run post-processing linear interpolation.",
+            )
+            parser.add_argument("--w_assoc_emb", type=float, default=0.75, help="Combine weight for emb cost")
+            parser.add_argument(
+                "--alpha_fixed_emb",
+                type=float,
+                default=0.95,
+                help="Alpha fixed for EMA embedding",
+            )
+            parser.add_argument("--emb_off", action="store_true")
+            parser.add_argument("--cmc_off", action="store_true")
+            parser.add_argument("--aw_off", action="store_true")
+            parser.add_argument("--aw_param", type=float, default=0.5)
+            parser.add_argument("--new_kf_off", action="store_true")
+            parser.add_argument("--grid_off", action="store_true")
+            # args = parser.parse_args()
+            args = parser.parse_args(["--cmc_off","--grid_off"])
 
-        process(
-            (tracker_type, tracker),
-            os.path.join(data_folder, mode, sequence, 'thermal'),
-            annotation_folder=os.path.join(annotation_folder, mode, sequence, 'thermal'),
-            outfile=os.path.join(out_folder, f"{sequence}_thermal.txt"),
-            mode=mode
+            if args.dataset == "mot17":
+                args.result_folder = os.path.join(args.result_folder, "MOT17-val")
+            elif args.dataset == "mot20":
+                args.result_folder = os.path.join(args.result_folder, "MOT20-val")
+            elif args.dataset == "dance":
+                args.result_folder = os.path.join(args.result_folder, "DANCE-val")
+            if args.test_dataset:
+                args.result_folder.replace("-val", "-test")
+            return args
+        args = get_main_args()
+
+        oc_sort_args = dict(
+            args=args,
+            det_thresh=args.track_thresh,
+            iou_threshold=args.iou_thresh,
+            asso_func=args.asso,
+            delta_t=args.deltat,
+            inertia=args.inertia,
+            w_association_emb=args.w_assoc_emb,
+            alpha_fixed_emb=args.alpha_fixed_emb,
+            embedding_off=args.emb_off,
+            cmc_off=args.cmc_off,
+            aw_off=args.aw_off,
+            aw_param=args.aw_param,
+            new_kf_off=args.new_kf_off,
+            grid_off=args.grid_off,
         )
+        tracker = tracker_module.ocsort.OCSort(**oc_sort_args)
+    sequence = sequences[args.seq]
+    print(args.track_thresh, args.seq)
+    process(
+        (tracker_type, tracker),
+        os.path.join(data_folder, mode, sequence, 'thermal'),
+        annotation_folder=os.path.join(annotation_folder, mode, sequence, 'thermal'),
+        outfile=os.path.join(out_folder, f"{sequence}_thermal.txt"),
+        mode=mode
+    )

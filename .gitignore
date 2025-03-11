@@ -4,6 +4,7 @@ utils/*
 results/*
 cache
 Deep_OC_SORT/external/weights/*
+tmot_dataset_challenge
 
 not_use
 .DS_Store

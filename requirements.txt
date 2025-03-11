@@ -1,0 +1,13 @@
+numpy==1.24.4
+pandas==1.4.4
+opencv-python==4.9.0.80
+torch==2.1.0
+ultralytics==8.1.26
+motmetrics==1.4.0
+mmcv==2.0.0
+matplotlib
+tqdm
+scipy
+absl-py==1.2.0
+pyyaml
+requests

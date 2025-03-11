@@ -4,7 +4,7 @@ from glob import glob
 import os
 model = YOLO("yolov8s.pt") # 원하는 크기 모델 입력(n ~ x)
 
-base_path = "/Users/horang/Downloads/tmot_dataset_challenge/"
+base_path = "./tmot_dataset_challenge/"
 # image_list = glob(os.path.join(base_path, 'images','train','*','thermal','*.png'))
 seq_list = glob(os.path.join(base_path, 'images','train','*'))
 ann_list = glob(os.path.join(base_path, 'annotations','train','*','thermal','COCO','*'))
