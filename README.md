@@ -8,10 +8,11 @@
   
 </div>
 
-This project performs multi-object tracking (MOT) on thermal image sequences using YOLO-based detection and several state-of-the-art tracking algorithms such as SORT, Deep SORT, ByteTrack, OC-SORT, and Deep OC-SORT.
+>This project performs multi-object tracking (MOT) on thermal image sequences using YOLO-based detection and several state-of-the-art tracking algorithms such as SORT, Deep SORT, ByteTrack, OC-SORT, and Deep OC-SORT.
 
-![Demo](figs/test_bytetrack_output.gif)
-
+<div align="center">
+  <img src="figs/test_bytetrack_output.gif" alt="Demo" width="50%">
+</div>
 ---
 
 ## 📁 Project Structure
