@@ -110,5 +110,3 @@ Tracking performance is evaluated using [MOTMetrics](https://github.com/cheind/p
 - [Deep OC-SORT: Multi-Pedestrian Tracking by Adaptive Re-Identification](https://arxiv.org/abs/2302.11813)
 - [ByteTrack: Multi-Object Tracking by Associating Every Detection Box](https://arxiv.org/abs/2110.06864)
 
-
----
