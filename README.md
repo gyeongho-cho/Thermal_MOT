@@ -7,12 +7,6 @@
 <a href="https://github.com/wassimea/thermalMOT/"><img src="https://img.shields.io/badge/Github-181717?logo=github" alt="Git"/></a>
 
 
-  
-</div>
-
->This repository contains my approach to the Thermal MOT Challenge 2025, organized under the 21st IEEE Workshop on Perception Beyond the Visible Spectrum (PBVS). It involves training a thermal image object detector and evaluating multiple MOT frameworks. The excellent submissions will be announced at CVPR 2025.
-
-<br><br>
 
 <div align="center">
   <img src="https://pbvs-workshop.github.io/images/logo_25.jpg" alt="Demo" width="70%">
@@ -22,6 +16,12 @@
   <img src="figs/test_bytetrack_output.gif" alt="Demo" width="50%">
   
 </div>
+
+  
+</div>
+
+>This repository contains my approach to the Thermal MOT Challenge 2025, organized under the 21st IEEE Workshop on Perception Beyond the Visible Spectrum (PBVS). It involves training a thermal image object detector and evaluating multiple MOT frameworks. The excellent submissions will be announced at CVPR 2025.
+
 
 
 
