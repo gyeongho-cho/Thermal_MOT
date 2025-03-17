@@ -94,7 +94,7 @@ Tracking performance is evaluated using [MOTMetrics](https://github.com/cheind/p
 
 <div align="center">
   
-| | MOTA | MOTP | IDF1 | IDP | IDR | RCLL | PRCN | FPS |
+| | MOTA↑ | MOTP↑ | IDF1↑ | IDP↑ | IDR↑ | RCLL↑ | PRCN↑ | FPS↑ |
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | 
 | SORT | 60.27 | 0.1973 | 56.61 | 69.05 | 47.96 | 65.50 | 94.29 | 10.52 |
 | OCSORT | 62.94 | 0.1747 | 61.40 | 75.16 | 51.90 | 66.52 | **96.34** | 10.44 |
