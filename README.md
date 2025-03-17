@@ -57,7 +57,7 @@ tmot_dataset_challenge/
 
 ---
 
-### 3. Training Object Detection Model (YoloV8s)
+### 3. Training Object Detection Model (YOLOv8s)
 
 Create dataset for training yolo. The dataset will be made at 'data/' folder.
 ```bash
